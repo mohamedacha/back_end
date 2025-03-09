@@ -15,10 +15,9 @@ return new class extends Migration
             $table->id();
             $table->boolean('confirmed');
             $table->integer('quantity');
-            $table->foriegnId('user_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
-            $table->foriegnId('service_id')->nullable()->constrained('services')->onDelete('set null');
-            
+            $table->foreignId('service_id')->nullable()->constrained('services')->onDelete('set null');
             $table->timestamps();
         });
     }
