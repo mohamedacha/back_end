@@ -18,7 +18,7 @@ return new class extends Migration
             $table->foriegnId('user_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('product_id')->nullable()->constrained('products')->onDelete('set null');
             $table->foriegnId('service_id')->nullable()->constrained('services')->onDelete('set null');
-
+            
             $table->timestamps();
         });
     }
