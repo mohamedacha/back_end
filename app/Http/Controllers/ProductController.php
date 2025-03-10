@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class ProductController extends Controller
 {
@@ -32,14 +33,16 @@ class ProductController extends Controller
             'category' => 'required' ,
             'description' => 'nullable',
             'quantity' =>'numeric|required' ,
-            'img' => 'mimes:png,jpg,jpeg|max:2048'
+            'img' => 'nullable|mimes:png,jpg,jpeg|max:2048'
         ]);
 
         if($request->hasFile('img')){
-            $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
-            $request->file('img')->move(public_path('img/products_imgs') , $name_img);
+
+            $path = $request->file('img')->store('products_imgs' , 'public') ;
+            // $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
+            // $request->file('img')->move(public_path('img/products_imgs') , $name_img);
         }else{
-            $name_img = 'default.png' ;
+            $path = 'default.png' ;
         }
 
         $product = Product::create([
@@ -48,7 +51,7 @@ class ProductController extends Controller
         'category'=> $product_validation['category'],
         'description'=> $product_validation['description'],
         'quantity' => $product_validation['quantity'],
-        'img' => $name_img,
+        'img' => $path,
         ]);
         return response()->json([
             'data' => $product
@@ -64,14 +67,18 @@ class ProductController extends Controller
             'category' => 'required' ,
             'description' => 'nullable',
             'quantity' =>'numeric|required' ,
-            'img' => 'mimes:png,jpg,jpeg|max:2048'
+            'img' => 'nullable|mimes:png,jpg,jpeg|max:2048'
         ]);
 
         if($request->hasFile('img')){
-            $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
-            $request->file('img')->move(public_path('img/products_imgs') , $name_img);
+            if ($product->img !== 'default.png') {
+                Storage::disk('public')->delete($product->img);
+            }
+            $path = $request->file('img')->store('products_imgs','public');
+            // $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
+            // $request->file('img')->move(public_path('img/products_imgs') , $name_img);
         }else{
-            $name_img = 'default.png' ;
+            $path = 'default.png' ;
         }
 
         $product->product_name = $product_validation['product_name'];
@@ -79,7 +86,7 @@ class ProductController extends Controller
         $product->category = $product_validation['category'];
         $product->description = $product_validation['description'];
         $product->quantity = $product_validation['quantity'];
-        $product->img = $name_img ;
+        $product->img = $path ;
         $product->save();
 
         return response()->json([

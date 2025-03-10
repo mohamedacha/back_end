@@ -4,17 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
-    // List all users
+    // -------------------------------------------------------------------------
     public function index()
     {
         $users = User::all();
         return response()->json($users);
     }
 
-    // Show a single user
+    // -------------------------------------------------------------------------
     public function show($id)
     {
         $user = User::find($id);
@@ -24,44 +26,76 @@ class UserController extends Controller
         return response()->json($user);
     }
 
-    // Create a new user
+    // -------------------------------------------------------------------------
     public function store(Request $request)
     {
-        $request->validate([
+        $user_validation = $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
-            'phone_number'=>'max:255',
+            'phone_number' => 'nullable|digits_between:8,14',
             'password' => 'required|min:6',
-            'img'=>'img'
+            'img' => 'nullable|mimes:png,jpg,jpeg|max:2048',
         ]);
+
+        if ($request->hasFile('img')) {
+            $path = $request->file('img')->store('users_imgs', 'public');
+        } else {
+            $path = 'default.png';
+        }
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'phone_number'=>$request->phone_number,
-            'password' => bcrypt($request->password),
-            'img'=>$request->image,
+            'name' => $user_validation['name'],
+            'email' => $user_validation['email'],
+            'phone_number' => $user_validation['phone_number'],
+            'password' => Hash::make($user_validation['password']), // Hashing password
+            'img' => $path,
+            'admin' => false,
         ]);
 
-        return response()->json($user, 201);
+        return response()->json([
+            'message' => 'User created successfully',
+            'data' => $user
+        ], 201);
     }
 
     // Update an existing user
     public function update(Request $request, $id)
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(['message' => 'User not found'], 404);
+        $user = User::findOrFail($id);
+        $user_validation = $request->validate([
+            'name' => 'nullable|string',
+            'phone_number' => 'nullable|digits_between:8,14',
+            'password' => 'nullable|min:6',
+            'img' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+        ]);
+        //----------------------------------------------------------
+        if ($request->hasFile('img')) {
+            if ($user->img !== 'default.png') {
+                Storage::disk('public')->delete($user->img);
+            }
+            $path = $request->file('img')->store('users_imgs', 'public');
+        } else {
+            $path = $user->img; // If no new image is uploaded, keep the existing one
         }
+        //----------------------------------------------------------
+        $user->name = $user_validation['name'] ?? $user->name;
+        $user->phone_number = $user_validation['phone_number'] ?? $user->phone_number;
+        if (isset($user_validation['password'])) {
+            $user->password = Hash::make($user_validation['password']);
+        }
+        $user->img = $path;
+        $user->save();
 
-        $user->update($request->only(['name', 'email']));
-        return response()->json($user);
+        return response()->json([
+            'message' => 'User updated successfully',
+            'data' => $user
+        ]);
     }
 
     // Delete a user
     public function destroy($id)
     {
-        $user = User::find($id);
+        $user = User::findOrFail($id);
         if (!$user) {
             return response()->json(['message' => 'User not found'], 404);
         }
