@@ -11,4 +11,3 @@ Route::get('/', function () {
 
 Route::apiResource('users', UserController::class);
 Route::apiResource('orders', OrderController::class);
-Route::apiResource('orders', OrderController::class);

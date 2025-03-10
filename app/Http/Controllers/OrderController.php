@@ -53,11 +53,12 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
 
-        $request->validate([
-            'status' => 'in:pending,processing,completed,cancelled',
+        $order_validate = $request->validate([
+            'quantity' => 'numeric|required',
         ]);
 
-        $order->update($request->only(['total_price', 'status']));
+        $order->quantity = $order_validate['quantity'];
+        $order->save();
         return response()->json($order);
     }
 
