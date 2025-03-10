@@ -10,6 +10,7 @@ class Order extends Model
         'confirmed' ,
         'quantity',
         'product_id',
+        'user_id' ,
         'service_id',
         'created_at',
     ];

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 
 class OrderController extends Controller
 {
@@ -27,22 +29,23 @@ class OrderController extends Controller
     // Create a new order
     public function store(Request $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'total_price' => 'required|numeric',
-            'status' => 'required|in:pending,processing,completed,cancelled',
+        $order_validate = $request->validate([
+            'quantity' => 'numeric|required',
+            'product_id' => 'numeric|nullable',
+            'service_id' => 'numeric|nullable',
         ]);
 
         $order = Order::create([
-            'user_id' => $request->user_id,
-            'total_price' => $request->total_price,
-            'status' => $request->status,
+            'confirmed' => false,
+            'quantity' => $order_validate['quantity'],
+            'product_id' => $order_validate['product_id'] ?? null,
+            'service_id' => $order_validate['service_id'] ?? null,
+            'user_id' => Auth::id(),
         ]);
 
-        return response()->json($order, 201);
+        return response()->json(['data' => $order], 201);
     }
-
-    // Update an existing order
+      // Update an existing order
     public function update(Request $request, $id)
     {
         $order = Order::find($id);
