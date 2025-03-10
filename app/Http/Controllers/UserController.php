@@ -30,13 +30,17 @@ class UserController extends Controller
         $request->validate([
             'name' => 'required|string',
             'email' => 'required|email|unique:users',
+            'phone_number'=>'max:255',
             'password' => 'required|min:6',
+            'img'=>'img'
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
+            'phone_number'=>$request->phone_number,
             'password' => bcrypt($request->password),
+            'img'=>$request->image,
         ]);
 
         return response()->json($user, 201);
