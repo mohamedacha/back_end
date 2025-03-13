@@ -68,14 +68,14 @@ class ServiceController extends Controller
         ]);
     }
 
-    public function delete(Service $service)
+    public function destroy($id)
     {
-        // Delete image if not default
-        if ($service->img !== 'default.png') {
-            Storage::disk('public')->delete($service->img);
+        $service = Service::Find($id) ;
+        if (!$service) {
+            return response()->json(['message' => 'service not found'], 404);
         }
-        
+
         $service->delete();
-        return response()->noContent();
+        return response()->json(['message' => 'service deleted succesfuly'], 200);
     }
 }

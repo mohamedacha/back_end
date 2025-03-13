@@ -14,7 +14,7 @@ class OrderController extends Controller
     public function index()
     {
         $orders = Order::all();
-        return response()->json($orders);
+        return response()->json(["data" => $orders]);
     }
 
     // ---------------------------------------------------------------------------------------
@@ -73,6 +73,6 @@ class OrderController extends Controller
             return response()->json(['message' => 'Order not found'], 404);
         }
         $order->delete();
-        return response()->json(['message' => 'Order deleted']);
+        return response()->json(['message' => 'Order deleted successfuly']);
     }
 }
