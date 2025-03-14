@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -13,7 +13,8 @@ class OrderController extends Controller
 
     public function index()
     {
-        $orders = Order::all();
+        // $orders = Order::all();
+        $orders = DB::select('SELECT * FROM Orders o JOIN users u ON o.user_id = u.id JOIN products p ON p.id = o.product_id JOIN services s ON s.id = o.service_id' );
         return response()->json(["data" => $orders]);
     }
 
