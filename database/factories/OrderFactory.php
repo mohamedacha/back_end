@@ -20,11 +20,11 @@ class OrderFactory extends Factory
     public function definition(): array
     {
         return [
-            'confirmed' => $this->faker()->boolean(),
-            'quantity' => $this->faker()->numberBetween(1,9000),
+            'confirmed' => $this->faker->boolean(),
+            'quantity' => $this->faker->numberBetween(1,9000),
             'user_id' => User::pluck('id')->random(),
-            'product_id' => optional(Product::pluck('id')->random()),
-            'service_id' => optional(Service::pluck('id')->random()),
+            'product_id' => Product::inRandomOrder()->value('id'), // Returns an ID or null
+            'service_id' => Service::inRandomOrder()->value('id'), // Returns an ID or null
             'created_at' => now() ,
         ];
     }

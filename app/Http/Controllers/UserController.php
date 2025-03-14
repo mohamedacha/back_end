@@ -61,7 +61,10 @@ class UserController extends Controller
     // Update an existing user
     public function update(Request $request, $id)
     {
-        $user = User::findOrFail($id);
+        $user = User::find($id);
+        if(!$user){
+            return response()->json(["message" => 'user not found'] , 404) ;
+        }
         $user_validation = $request->validate([
             'name' => 'nullable|string',
             'phone_number' => 'nullable|digits_between:8,14',
