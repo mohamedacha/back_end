@@ -15,3 +15,10 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('products', ProductController::class);
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('services', ServiceController::class);
+
+
+
+Route::get('/orders', [OrderController::class, 'index']);
+Route::put('/orders/{id}', [OrderController::class, 'update']);
+Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
+Route::post('/orders/{id}/confirm', [OrderController::class, 'confirm']);
