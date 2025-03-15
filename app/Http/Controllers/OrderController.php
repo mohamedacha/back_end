@@ -4,8 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Order;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class OrderController extends Controller
 {
@@ -76,4 +77,18 @@ class OrderController extends Controller
         $order->delete();
         return response()->json(['message' => 'Order deleted successfuly']);
     }
+
+    public function confirmOrder($id): JsonResponse
+{
+    $order = Order::find($id);
+
+    if (!$order) {
+        return response()->json(['message' => 'Order not found'], 404);
+    }
+
+    // Update the order confirmation status
+    $order->update(['confirmed' => true]);
+
+    return response()->json(['message' => 'Order confirmed successfully'], 200);
+}
 }
