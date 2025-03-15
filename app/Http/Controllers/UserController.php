@@ -73,7 +73,7 @@ class UserController extends Controller
         ]);
         //----------------------------------------------------------
         if ($request->hasFile('img')) {
-            if ($user->img !== 'default.png') {
+            if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'default.png') {
                 Storage::disk('public')->delete($user->img);
             }
             $path = $request->file('img')->store('users_imgs', 'public');
@@ -83,7 +83,7 @@ class UserController extends Controller
         //----------------------------------------------------------
         $user->name = $user_validation['name'] ?? $user->name;
         $user->phone_number = $user_validation['phone_number'] ?? $user->phone_number;
-        if (isset($user_validation['password'])) {
+        if (!empty($user_validation['password'])) {
             $user->password = Hash::make($user_validation['password']);
         }
         $user->img = $path;

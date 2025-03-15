@@ -15,3 +15,10 @@ Route::apiResource('users', UserController::class);
 Route::apiResource('products', ProductController::class);
 Route::apiResource('orders', OrderController::class);
 Route::apiResource('services', ServiceController::class);
+
+// ------------
+// Route::match(['put', 'patch'], '/api/users/{id}', [UserController::class, 'update']);
+
+Route::middleware(['auth:sanctum'])->group(function () {
+    Route::patch('/users/{id}', [UserController::class, 'update']);
+});
