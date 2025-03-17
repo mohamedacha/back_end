@@ -83,12 +83,19 @@ class UserController extends Controller
         
             //REMOVE_IMG IS AN ATTRIBUTE COMING FROM REACT TO SET THR USER IMG TO ITS DEFAULT STATE
             if ($request->hasFile('img') && $request->remove_img == "false") {
-                if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'default.png') {
-                    Storage::disk('public')->delete($user->img);
+
+                if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'users_imgs/default.jpg') {
+                    Storage::disk('public')->delete($user->img); //delete imh if exists
                 }
                 $path = $request->file('img')->store('users_imgs', 'public');
-            } else {
-                $request->remove_img ? $path = 'users_imgs/default.jpg' : $path = $user->img;
+            
+            }else if($request->remove_img == 'true'){
+                    if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'users_imgs/default.jpg') {
+                        Storage::disk('public')->delete($user->img); //delete imh if exists
+                    }
+                    $path = 'users_imgs/default.jpg';
+            }else{
+                $path = $user->img;
             }
             //----------------------------------------------------------
             $user->name = $user_validation['name'] ?? $user->name;
