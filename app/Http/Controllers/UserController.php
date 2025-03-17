@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
@@ -70,37 +71,43 @@ class UserController extends Controller
         if(!$user){
             return response()->json(["message" => 'user not found'] , 404) ;
         }
-        $user_validation = $request->validate([
-            'name' => 'nullable|string',
-            'phone_number' => 'nullable|digits_between:8,14',
-            'password' => 'nullable|min:6',
-            'img' => 'nullable|mimes:png,jpg,jpeg|max:2048',
-            'address' => 'nullable|string|max:255',
+        try{
+            $user_validation = $request->validate([
+                'name' => 'required|string|min:3',
+                'phone_number' => 'required|digits_between:8,14',
+                'password' => 'nullable|min:6',
+                'img' => 'nullable|mimes:png,jpg,jpeg|max:2048',
+                'address' => 'required|string|max:255',    
+            ]);
 
-        ]);
-        //----------------------------------------------------------
-        if ($request->hasFile('img')) {
-            if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'default.png') {
-                Storage::disk('public')->delete($user->img);
+        
+            //REMOVE_IMG IS AN ATTRIBUTE COMING FROM REACT TO SET THR USER IMG TO ITS DEFAULT STATE
+            if ($request->hasFile('img') && $request->remove_img == "false") {
+                if ($user->img && Storage::disk('public')->exists($user->img) && $user->img !== 'default.png') {
+                    Storage::disk('public')->delete($user->img);
+                }
+                $path = $request->file('img')->store('users_imgs', 'public');
+            } else {
+                $request->remove_img ? $path = 'users_imgs/default.jpg' : $path = $user->img;
             }
-            $path = $request->file('img')->store('users_imgs', 'public');
-        } else {
-            $path = $user->img; // If no new image is uploaded, keep the existing one
-        }
-        //----------------------------------------------------------
-        $user->name = $user_validation['name'] ?? $user->name;
-        $user->phone_number = $user_validation['phone_number'] ?? $user->phone_number;
-        $user->address = $user_validation['address'] ?? $user->address;
-        if (!empty($user_validation['password'])) {
-            $user->password = Hash::make($user_validation['password']);
-        }
-        $user->img = $path;
-        $user->save();
+            //----------------------------------------------------------
+            $user->name = $user_validation['name'] ?? $user->name;
+            $user->phone_number = $user_validation['phone_number'] ?? $user->phone_number;
+            $user->address = $user_validation['address'] ?? $user->address;
+            if (!empty($user_validation['password'])) {
+                $user->password = Hash::make($user_validation['password']);
+            }
+            $user->img = $path;
+            $user->save();
 
-        return response()->json([
-            'message' => 'User updated successfully',
-            'data' => $user
-        ]);
+            return response()->json([
+                'message' => 'User updated successfully',
+                'data' => $user
+            ]);
+
+        } catch(ValidationException  $e){
+            return response()->json(['errors' => $e->errors()], 422);
+        }
     }
 
     // Delete a user
