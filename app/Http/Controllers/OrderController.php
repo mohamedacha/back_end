@@ -52,20 +52,25 @@ class OrderController extends Controller
     }
     // ---------------------------------------------------------------------------------------
     public function update(Request $request, $id)
-    {
-        $order = Order::find($id);
-        if (!$order) {
-            return response()->json(['message' => 'Order not found'], 404);
-        }
-
-        $order_validate = $request->validate([
-            'quantity' => 'numeric|required',
-        ]);
-
-        $order->quantity = $order_validate['quantity'];
-        $order->save();
-        return response()->json($order);
+{
+    $order = Order::find($id);
+    if (!$order) {
+        return response()->json(['message' => 'Order not found'], 404);
     }
+
+    $request->validate([
+        
+        'quantity' => 'required|integer',
+    ]);
+
+    $order->update([
+        
+        'quantity' => $request->quantity,
+    ]);
+
+    return response()->json(['message' => 'Order updated successfully', 'order' => $order]);
+}
+
 
     // Delete an order--------------------------------------------------
     public function destroy($id)
