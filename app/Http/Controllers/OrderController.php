@@ -34,22 +34,28 @@ class OrderController extends Controller
     // ---------------------------------------------------------------------------------------
     public function store(Request $request)
     {
-        $order_validate = $request->validate([
-            'quantity' => 'required|numeric|min:1',
-            'product_id' => 'numeric|nullable',
-            'service_id' => 'numeric|nullable',
-            'user_id' => 'numeric|required',
-        ]);
+        try{
 
-        $order = Order::create([
-            'confirmed' => false,
-            'quantity' => $order_validate['quantity'],
-            'product_id' => $order_validate['product_id'] ?? null,
-            'service_id' => $order_validate['service_id'] ?? null,
-            'user_id' => $order_validate['user_id'],
-        ]);
-
-        return response()->json(['data' => $order], 201);
+            $order_validate = $request->validate([
+                'quantity' => 'required|numeric|min:1',
+                'product_id' => 'numeric|nullable',
+                'service_id' => 'numeric|nullable',
+                'user_id' => 'numeric|required',
+            ]);
+    
+            $order = Order::create([
+                'confirmed' => false,
+                'quantity' => $order_validate['quantity'],
+                'product_id' => $order_validate['product_id'] ?? null,
+                'service_id' => $order_validate['service_id'] ?? null,
+                'user_id' => $order_validate['user_id'],
+            ]);
+    
+            return response()->json(['message' => 'order created successfuly','order' => $order], 201);
+        }catch(ValidationException $e){
+            
+            return response()->json(['errors' => $e->errors()], 201);
+        }
     }
     // ---------------------------------------------------------------------------------------
     public function update(Request $request, $id)

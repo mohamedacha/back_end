@@ -33,13 +33,17 @@ class UserController extends Controller
     // -------------------------------------------------------------------------
     public function store(Request $request)
     {
+        // return response()->json(['errors' => $request]);
+        // dd($request->email_) ;
+        try{
         $user_validation = $request->validate([
-            'name' => 'required|string',
-            'email' => 'required|email|unique:users',
-            'phone_number' => 'nullable|digits_between:8,14',
-            'password' => 'required|min:6',
+            'name' => 'required|string|min:2|filled',
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|min:6|filled',
             'img' => 'nullable|image|mimes:png,jpg,jpeg,gif|max:2048',
-            'address' => 'required|string|max:255',
+            'address' => 'required|string|max:255|filled',
+            'phone_number' => 'nullable|digits_between:8,14',
+            
         ]);
 
         if ($request->hasFile('img')) {
@@ -52,7 +56,7 @@ class UserController extends Controller
             'name' => $user_validation['name'],
             'address' => $user_validation['address'],
             'email' => $user_validation['email'],
-            'phone_number' => $user_validation['phone_number'],
+            'phone_number' => $user_validation['phone_number'] ?? '0000000000' ,
             'password' => Hash::make($user_validation['password']), // Hashing password
             'img' => $path,
             'admin' => false,
@@ -62,6 +66,8 @@ class UserController extends Controller
             'message' => 'User created successfully',
             'data' => $user
         ], 201);
+    }catch(ValidationException $e){
+        return response()->json(['errors' => $e->errors()],422) ;}
     }
 
     // Update an existing user
