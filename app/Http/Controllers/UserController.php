@@ -134,4 +134,39 @@ class UserController extends Controller
         $user->delete();
         return response()->json(['message' => 'User deleted']);
     }
+
+    public function login (Request $request){
+        try{
+
+            $request->validate([
+                'email' => 'email|required' ,
+                'password' => 'required|min:6' ,
+            ]);
+            // return response()->json($request) ;
+            $user = User::Where('email' , $request->email)->first();
+            if (!$user) {
+                return response()->json(['errors' => ['email' => "this mail don't exist"]], 404);
+            }
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json(['errors' => ['password'=>'Wrong password']], 401);
+            }
+
+            // $token = $user->createToken('auth_token')->plainTextToken;
+            return response()->json([
+                'message' => 'Login successful',
+                'user' => $user,
+                // 'token' => $token
+            ], 200);
+
+        }catch(ValidationException $e){
+            return response()->json(['errors' => $e->errors()] , 422) ;
+        }
+         catch (\Exception $e) {
+        return response()->json(['errors' => 'Something went wrong'], 500);
+        }
+    }
+
+
+
+    public function logout (){}
 }

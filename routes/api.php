@@ -25,6 +25,8 @@ Route::apiResource('services', ServiceController::class);
 //     Route::patch('/users/{id}', [UserController::class, 'update']);
 // });
 
+Route::post('/users/login', [UserController::class, 'login']);
+Route::get('/users/logout', [UserController::class, 'logout']);
 
 Route::get('/orders', [OrderController::class, 'index']);
 Route::put('/orders/{id}', [OrderController::class, 'update']);
