@@ -61,11 +61,16 @@ class UserController extends Controller
             'img' => $path,
             'admin' => false,
         ]);
+       
+        $token = $user->createToken('auth_token')->plainTextToken;
+
 
         return response()->json([
             'message' => 'User created successfully',
-            'data' => $user
+            'data' => $user,
+            'token' => $token
         ], 201);
+        
     }catch(ValidationException $e){
         return response()->json(['errors' => $e->errors()],422) ;}
     }

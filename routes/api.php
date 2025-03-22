@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Route;
 
 Route::apiResource('products', ProductController::class);
 Route::apiResource('services', ServiceController::class);
+Route::apiResource('users', UserController::class) ; //done
+Route::post('users/login', [UserController::class , 'login']) ; //done
+
 Route::middleware('auth:sanctum')->group(function(){
     
     Route::post('/users/logout', [UserController::class, 'logout']);
