@@ -40,7 +40,7 @@ class ServiceController extends Controller
             'img' => $name_img,
         ]);
 
-        return response()->json(['message' => 'Service created successfully!'], 201);
+        return response()->json(['data' => $service], 201);
     }
 
     public function update(Request $request, Service $service)

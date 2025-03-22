@@ -28,9 +28,3 @@ Route::get('/orders', [OrderController::class, 'index']);
 Route::put('/orders/{id}', [OrderController::class, 'update']);
 Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmOrder']);
-
-
-
-
-Route::post('/services', [ServiceController::class, 'store']);
-Route::post('/services/{id}', [ServiceController::class, 'update']);
