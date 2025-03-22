@@ -11,22 +11,18 @@ use Illuminate\Support\Facades\Route;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
-Route::apiResource('users', UserController::class);
 Route::apiResource('products', ProductController::class);
-Route::apiResource('orders', OrderController::class);
 Route::apiResource('services', ServiceController::class);
+Route::middleware('auth:sanctum')->group(function(){
+    
+    Route::post('/users/logout', [UserController::class, 'logout']);
+    Route::apiResource('users', UserController::class)->except(['store' , 'login']);
+    Route::apiResource('products', ProductController::class)->except(['show' , 'index']);
+    Route::apiResource('orders', OrderController::class);
+    
+});
+// Route::post('/users/login', [UserController::class, 'login']);
 
-//------------------
-// Route::post('/users/{id}', [UserController::class , 'update']); // ✅ Allow POST for PUT
-// Route::put('/users/{id}', [UserController::class , 'update']); // ✅ Direct PUT
-//------------------
-
-// Route::middleware(['auth:sanctum'])->group(function () {
-//     Route::patch('/users/{id}', [UserController::class, 'update']);
-// });
-
-Route::post('/users/login', [UserController::class, 'login']);
-Route::get('/users/logout', [UserController::class, 'logout']);
 
 Route::get('/orders', [OrderController::class, 'index']);
 Route::put('/orders/{id}', [OrderController::class, 'update']);

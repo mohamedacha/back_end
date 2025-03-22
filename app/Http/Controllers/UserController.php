@@ -142,7 +142,7 @@ class UserController extends Controller
                 'email' => 'email|required' ,
                 'password' => 'required|min:6' ,
             ]);
-            // return response()->json($request) ;
+
             $user = User::Where('email' , $request->email)->first();
             if (!$user) {
                 return response()->json(['errors' => ['email' => "this mail don't exist"]], 404);
@@ -151,11 +151,11 @@ class UserController extends Controller
                 return response()->json(['errors' => ['password'=>'Wrong password']], 401);
             }
 
-            // $token = $user->createToken('auth_token')->plainTextToken;
+            $token = $user->createToken('auth_token')->plainTextToken;
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
-                // 'token' => $token
+                'token' => $token
             ], 200);
 
         }catch(ValidationException $e){
@@ -168,5 +168,8 @@ class UserController extends Controller
 
 
 
-    public function logout (){}
+    public function logout (Request $request){
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out successfully'], 200);
+    }
 }
