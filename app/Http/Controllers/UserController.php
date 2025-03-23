@@ -49,7 +49,7 @@ class UserController extends Controller
         if ($request->hasFile('img')) {
             $path = $request->file('img')->store('users_imgs', 'public');
         } else {
-            $path = 'users_imgs/default.png';
+            $path = 'users_imgs/default.jpg';
         }
 
         $user = User::create([
