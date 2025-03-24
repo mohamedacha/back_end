@@ -22,9 +22,9 @@ Route::middleware('auth:sanctum')->group(function(){
     Route::apiResource('users', UserController::class)->except(['store' , 'login']);
     Route::apiResource('products', ProductController::class)->except(['show' , 'index']);
     Route::apiResource('orders', OrderController::class);
+    Route::apiResource('services', ServiceController::class)->except(['index' , 'show']);
     
 });
-// Route::post('/users/login', [UserController::class, 'login']);
 
 
 Route::get('/orders', [OrderController::class, 'index']);
@@ -32,8 +32,3 @@ Route::put('/orders/{id}', [OrderController::class, 'update']);
 Route::delete('/orders/{id}', [OrderController::class, 'destroy']);
 Route::post('/orders/{id}/confirm', [OrderController::class, 'confirmOrder']);
 
-
-
-
-Route::post('/services', [ServiceController::class, 'store']);
-Route::post('/services/{id}', [ServiceController::class, 'update']);
