@@ -10,6 +10,9 @@ class ProductController extends Controller
 {
     public function index(){
         $products = Product::all();
+        foreach($products as $product){
+            $product->img = asset('storage/'.$product->img);
+        }
         return response()->json([
             'data' => $products
         ]);
@@ -19,9 +22,9 @@ class ProductController extends Controller
 
     public function show($id){
         $product = Product::findOrFail($id);
-        return response()->json([
-            'data' => $product
-        ]);
+        $default = asset('storage/products_imgs/default.png');
+        $product->img = $product->img ? asset('storage/' . $product->img) : asset('storage/default.png'); // Ensure default.jpeg is accessible
+        return response()->json(['data' => $product ,"default_img" => $default]);
     }
 //---------------------------------------------------------------------------------
 
@@ -37,12 +40,9 @@ class ProductController extends Controller
         ]);
 
         if($request->hasFile('img')){
-
             $path = $request->file('img')->store('products_imgs' , 'public') ;
-            // $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
-            // $request->file('img')->move(public_path('img/products_imgs') , $name_img);
         }else{
-            $path = 'default.png' ;
+            $path = 'products_imgs/default.png' ;
         }
 
         $product = Product::create([
@@ -71,14 +71,12 @@ class ProductController extends Controller
         ]);
 
         if($request->hasFile('img')){
-            if ($product->img !== 'default.png') {
+            if ($product->img && $product->img !== 'products_imgs/default.png' && Storage::disk('public')->exists($product->img)) {
                 Storage::disk('public')->delete($product->img);
             }
             $path = $request->file('img')->store('products_imgs','public');
-            // $name_img = now()->format('Y-m-d_H-i-s')  .'_'. $request->file('img')->getClientOriginalName() ;
-            // $request->file('img')->move(public_path('img/products_imgs') , $name_img);
         }else{
-            $path = 'default.png' ;
+            $path = 'products_imgs/default.png' ;
         }
 
         $product->product_name = $product_validation['product_name'] ?? $product->product_name;

@@ -11,12 +11,18 @@ class ServiceController extends Controller
     public function index()
     {
         $services = Service::all();
+        foreach($services as $service){
+            $service->img = asset('storage/'.$service->img);
+        }
         return response()->json(['data' => $services]);
     }
 
     public function show(Service $service)
     {
-        return response()->json(['data' => $service]);
+        
+        $default = asset('storage/services_imgs/default.jpeg');
+        $service->img = $service->img ? asset('storage/' . $service->img) : asset('storage/default.jpeg'); // Ensure default.jpeg is accessible
+        return response()->json(["data" => $service , "default_img" => $default]);
     }
 
     public function store(Request $request)
@@ -28,7 +34,7 @@ class ServiceController extends Controller
             'img' => 'nullable|mimes:png,jpg,jpeg|max:2048'
         ]);
 
-        $name_img = 'default.png';
+        $name_img = 'services_imgs/default.jpeg';
         if ($request->hasFile('img')) {
             $name_img = $request->file('img')->store('services_imgs', 'public');
         }
@@ -53,8 +59,7 @@ class ServiceController extends Controller
         ]);
 
         if ($request->hasFile('img')) {
-            // Delete the old image if it's not the default
-            if ($service->img !== 'default.png') {
+            if ($service->img && Storage::disk('public')->exists($service->img) && $service->img !== 'services_imgs/default.jpeg') {
                 Storage::disk('public')->delete($service->img);
             }
             $service->img = $request->file('img')->store('services_imgs', 'public');
