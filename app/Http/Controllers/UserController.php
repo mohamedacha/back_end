@@ -63,6 +63,7 @@ class UserController extends Controller
         ]);
        
         $token = $user->createToken('auth_token')->plainTextToken;
+        $user->img = $user->img ? asset('storage/' . $user->img) : asset('storage/default.png'); // Ensure default.png is accessible
 
 
         return response()->json([
@@ -86,7 +87,7 @@ class UserController extends Controller
             $user_validation = $request->validate([
                 'name' => 'required|string|min:3',
                 'phone_number' => 'required|digits_between:8,14',
-                'password' => 'nullable|min:6',
+                'password' => 'sometimes|required|min:6',
                 'img' => 'nullable|mimes:png,jpg,jpeg|max:2048',
                 'address' => 'required|string|max:255',    
             ]);
@@ -117,6 +118,7 @@ class UserController extends Controller
             }
             $user->img = $path;
             $user->save();
+            $user->img = $user->img ? asset('storage/' . $user->img) : asset('storage/default.png'); // Ensure default.png is accessible
 
             return response()->json([
                 'message' => 'User updated successfully',
@@ -145,7 +147,7 @@ class UserController extends Controller
 
             $request->validate([
                 'email' => 'email|required' ,
-                'password' => 'required|min:6' ,
+                'password' => 'required|min:6|filled' ,
             ]);
 
             $user = User::Where('email' , $request->email)->first();
@@ -157,6 +159,7 @@ class UserController extends Controller
             }
 
             $token = $user->createToken('auth_token')->plainTextToken;
+            $user->img = $user->img ? asset('storage/' . $user->img) : asset('storage/default.png'); // Ensure default.png is accessible
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,

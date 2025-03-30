@@ -13,28 +13,41 @@ class OrderController extends Controller
 {
     // ---------------------------------------------------------------------------------------
 
-    public function index()
+    public function index($id)
     {
-        // $orders = Order::all();
-        $orders = DB::select('SELECT o.* , p.product_name , p.price FROM Orders o JOIN products p ON p.id = o.product_id ' );
-        return response()->json(["data" => $orders]);
+        $orders = DB::select('SELECT o.*, p.product_name, p.price, p.img 
+        FROM Orders o 
+        JOIN products p ON p.id = o.product_id 
+        JOIN users u ON o.user_id = u.id 
+        WHERE u.id = ?', [$id]);
+
+        if (count($orders) > 0) {
+            foreach ($orders as $order) {
+                $order->img = asset('storage/' . $order->img);
+            }
+            return response()->json(["data" => $orders]);
+        } else {
+            return response()->json(["data" => []]); // Return empty array if no orders found
+        }
     }
 
     // ---------------------------------------------------------------------------------------
 
     public function show($id)
     {
-        $order = DB::select('SELECT o.* , p.product_name, p.img , p.description , p.price   FROM Orders o JOIN products p ON p.id = o.product_id WHERE o.id = :id' ,[$id] )[0];
+        $order = DB::select('SELECT o.* , p.product_name, p.img , p.description , p.price   FROM Orders o JOIN products p ON p.id = o.product_id WHERE o.id = :id', [$id])[0];
         if (!$order) {
             return response()->json(['message' => 'Order not found'], 404);
         }
+        $order->img = $order->img ? asset('storage/' . $order->img) : asset('storage/default.png'); // Ensure default.png is accessible
+
         return response()->json($order);
     }
 
     // ---------------------------------------------------------------------------------------
     public function store(Request $request)
     {
-        try{
+        try {
 
             $order_validate = $request->validate([
                 'quantity' => 'required|numeric|min:1',
@@ -42,7 +55,7 @@ class OrderController extends Controller
                 'service_id' => 'numeric|nullable',
                 'user_id' => 'numeric|required',
             ]);
-    
+
             $order = Order::create([
                 'confirmed' => false,
                 'quantity' => $order_validate['quantity'],
@@ -50,34 +63,33 @@ class OrderController extends Controller
                 'service_id' => $order_validate['service_id'] ?? null,
                 'user_id' => $order_validate['user_id'],
             ]);
-    
-            return response()->json(['message' => 'order created successfuly','order' => $order], 201);
-        }catch(ValidationException $e){
-            
+
+            return response()->json(['message' => 'order created successfuly', 'order' => $order], 201);
+        } catch (ValidationException $e) {
+
             return response()->json(['errors' => $e->errors()], 201);
         }
     }
     // ---------------------------------------------------------------------------------------
     public function update(Request $request, $id)
-{
-    $order = Order::find($id);
-    if (!$order) {
-        return response()->json(['message' => 'Order not found'], 404);
+    {
+        $order = Order::find($id);
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+        try {
+            $validation = $request->validate([
+                'quantity' => 'required|numeric|min:1',
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json(['errors' => $e->errors()], 422);
+        }
+
+        $order->quantity = $validation['quantity'];
+        $order->save();
+
+        return response()->json(['message' => 'Order updated successfully', 'order' => $order]);
     }
-    try{
-        $validation = $request->validate([
-            'quantity' => 'required|numeric|min:1',
-        ]);
-
-    }catch(ValidationException $e){
-        return response()->json(['errors' => $e->errors()], 422);
-    }
-
-    $order->quantity = $validation['quantity'] ;
-    $order->save();
-
-    return response()->json(['message' => 'Order updated successfully', 'order' => $order]);
-}
 
 
     // Delete an order--------------------------------------------------
@@ -92,16 +104,16 @@ class OrderController extends Controller
     }
 
     public function confirmOrder($id): JsonResponse
-{
-    $order = Order::find($id);
+    {
+        $order = Order::find($id);
 
-    if (!$order) {
-        return response()->json(['message' => 'Order not found'], 404);
+        if (!$order) {
+            return response()->json(['message' => 'Order not found'], 404);
+        }
+
+        // Update the order confirmation status
+        $order->update(['confirmed' => true]);
+
+        return response()->json(['message' => 'Order confirmed successfully'], 200);
     }
-
-    // Update the order confirmation status
-    $order->update(['confirmed' => true]);
-
-    return response()->json(['message' => 'Order confirmed successfully'], 200);
-}
 }
