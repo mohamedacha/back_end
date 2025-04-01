@@ -31,11 +31,29 @@ class OrderController extends Controller
         }
     }
 
+    
+    public function admin_index()
+    {
+        $orders = DB::select('SELECT o.*, p.product_name, p.price, p.img , u.email  as client
+        FROM Orders o 
+        JOIN products p ON p.id = o.product_id 
+        JOIN users u ON o.user_id = u.id ');
+
+        if (count($orders) > 0) {
+            foreach ($orders as $order) {
+                $order->img = asset('storage/' . $order->img);
+            }
+            return response()->json(["data" => $orders]);
+        } else {
+            return response()->json(["data" => []]); // Return empty array if no orders found
+        }
+    }
+
     // ---------------------------------------------------------------------------------------
 
     public function show($id)
     {
-        $order = DB::select('SELECT o.* , p.product_name, p.img , p.description , p.price   FROM Orders o JOIN products p ON p.id = o.product_id WHERE o.id = :id', [$id])[0];
+        $order = DB::select('SELECT o.* , p.product_name, p.img , p.description , p.price , p.quantity as product_quantity  FROM Orders o JOIN products p ON p.id = o.product_id WHERE o.id = :id', [$id])[0];
         if (!$order) {
             return response()->json(['message' => 'Order not found'], 404);
         }

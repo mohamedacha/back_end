@@ -19,6 +19,8 @@ Route::post('users/login', [UserController::class , 'login']) ; //done
 Route::middleware('auth:sanctum')->group(function(){
     
     Route::post('/users/logout', [UserController::class, 'logout']);
+    Route::get('orders/admin_index',[ OrderController::class , 'admin_index']);
+
     Route::apiResource('users', UserController::class)->except(['store' , 'login']);
     Route::apiResource('products', ProductController::class)->except(['show' , 'index']);
     Route::apiResource('orders', OrderController::class);
