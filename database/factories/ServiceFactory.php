@@ -18,8 +18,8 @@ class ServiceFactory extends Factory
     {
         $type = ["cat1" , "cat2", "cat3" , "cat4"];
         return [
-            'type' => $this->faker->randomElement($type) ,
-            'img' => 'default.png' ,
+            'service_name' => $this->faker->randomElement($type) ,
+            'img' => 'services_imgs/default.png' ,
             'description' => $this->faker->text(),
             'available' => $this->faker->boolean(),
             'created_at' => now(),

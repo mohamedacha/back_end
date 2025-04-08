@@ -11,7 +11,7 @@ class Service extends Model
     use HasFactory, Notifiable;
 
     protected $fillable =[
-        'type',
+        'service_name',
         'img'  ,
         'description',
         'available' ,
